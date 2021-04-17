@@ -3,7 +3,7 @@ add scrapping vk.com
 
 run 
 
-1./main 
+1. ./main 
 
 2. ./main group id
 
