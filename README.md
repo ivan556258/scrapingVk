@@ -4,9 +4,7 @@ add scrapping vk.com
 run 
 
 1./main 
-
 2. ./main group id
-
 3. ./main add_friend
 
 1.1 after inter name and token
