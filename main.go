@@ -56,13 +56,21 @@ func main() {
 		fmt.Scan(&token)
 		insertSql(db, "INSERT INTO setting(name, token) values('"+name+"','"+token+"')")
 	}
-	gocron.Every(48).Minutes().Do(rootChild)
-	<-gocron.Start()
-
-	/* 	if err := root(db, os.Args[1:2]); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	} */
+	if os.Args[1] == "group" {
+		if err := root(db, os.Args[1:2]); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	}
+	if os.Args[1] == "add_friend" {
+		if len(os.Args) == 3 {
+			arg, _ := strconv.ParseUint(os.Args[2], 10, 64)
+			gocron.Every(arg).Minutes().Do(rootChild)
+		} else {
+			gocron.Every(47).Minutes().Do(rootChild)
+		}
+		<-gocron.Start()
+	}
 
 	//getSql()
 	//go getRequest()
@@ -71,7 +79,6 @@ func main() {
 }
 
 func rootChild() {
-	fmt.Println(55454)
 	var db *sql.DB
 	db = InitDB()
 	str := make([]string, 1, 2)
@@ -144,12 +151,12 @@ func root(db *sql.DB, args []string) error {
 		var token string
 		token = getToken(db)
 		adf := addFriend(db, token)
-
 		upsql(db, adf[0], adf[1])
 		return errors.New("11111")
 	}
 
 	if os.Args[1] == "group" {
+
 		addPeoples(db, os.Args[2])
 		return errors.New("11111")
 	}
@@ -175,7 +182,6 @@ func addFriend(db *sql.DB, token string) []string {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(itemData.user_id)
 
 	res, err := http.Get("https://api.vk.com/method/friends.add?user_id=" + itemData.user_id + "&v=5.130&access_token=" + token)
 
@@ -205,10 +211,8 @@ func addFriend(db *sql.DB, token string) []string {
 
 func upsql(db *sql.DB, iresponse string, userid string) {
 	if iresponse == "1" {
-		fmt.Println("111")
 		insertSql(db, "UPDATE users SET status = '1' WHERE user_id = '"+userid+"'") // success send
 	} else if iresponse == "0" {
-		fmt.Println("222")
 		insertSql(db, "UPDATE users SET status = '2' WHERE user_id = '"+userid+"'") // user have block into vk.com
 	} else {
 		fmt.Println("error")
